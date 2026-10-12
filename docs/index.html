@@ -7,64 +7,86 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: 배너 → 입력 폼 → 사주명식 · 오행 → 대운 → 일간 해석 → MBTI 비교 → 상세 풀이. 먹색 잉크 + 오방색 원소 표시, 인주(朱) 도장은 이름에만. */
+/* Layout: 배너 → 입력 폼 → 사주명식 · 오행 → 대운 → 일간 해석 → MBTI 비교 → 상세 풀이.
+   태극 빨강(#CD2E3A)·파랑(#0047A0) 그라데이션을 강조색으로, 오행 표시는 오방색 그대로. */
 :root {
-  --bg: #f1f2f5;
+  --tg-red: #cd2e3a;
+  --tg-blue: #0047a0;
+  --red-ink: #b8222f;
+  --blue-ink: #0047a0;
+  --grad: linear-gradient(120deg, var(--tg-red) 0%, var(--tg-blue) 100%);
+  --bg: #f3f4f9;
+  --glow-red: rgba(205, 46, 58, .10);
+  --glow-blue: rgba(0, 71, 160, .10);
   --surface: #ffffff;
-  --ink: #1b1f2e;
-  --muted: #5d6275;
-  --line: #d9dbe3;
-  --seal: #b8392b;
+  --ink: #141a2e;
+  --muted: #565d75;
+  --line: #d8dbe6;
+  --on-grad: #ffffff;
   --wood: #2f7d6b; --fire: #c4452f; --earth: #b8892a; --metal: #8a8f9e; --water: #24365f;
-  --chip: #e6e8ef;
-  --sky1: #0f3c74; --sky2: #2f7cc1; --sky3: #9fd0f0; --sky-fg: #ffffff; --sky-accent: #ffd34d;
+  --chip: #e7e9f2;
   --f-display: "Nanum Myeongjo", "Batang", "AppleMyungjo", serif;
   --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
 }
+@supports (background: linear-gradient(in oklab 90deg, red, blue)) {
+  :root { --grad: linear-gradient(in oklab 120deg, var(--tg-red) 0%, var(--tg-blue) 100%); }
+}
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #11131b; --surface: #1a1d28; --ink: #e8e9ef; --muted: #9da2b4; --line: #2c3040;
-    --seal: #e0614f; --wood: #56b39c; --fire: #ef7158; --earth: #d9ad4c; --metal: #c3c7d2; --water: #7f9be0;
-    --chip: #262a38; color-scheme: dark;
+    --red-ink: #ff6f7a; --blue-ink: #79a6ff;
+    --bg: #0f121c; --glow-red: rgba(205, 46, 58, .16); --glow-blue: rgba(0, 71, 160, .22);
+    --surface: #181c2a; --ink: #e9ebf3; --muted: #a0a6bb; --line: #2b3044;
+    --wood: #56b39c; --fire: #ef7158; --earth: #d9ad4c; --metal: #c3c7d2; --water: #7f9be0;
+    --chip: #252a3b; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #11131b; --surface: #1a1d28; --ink: #e8e9ef; --muted: #9da2b4; --line: #2c3040;
-  --seal: #e0614f; --wood: #56b39c; --fire: #ef7158; --earth: #d9ad4c; --metal: #c3c7d2; --water: #7f9be0;
-  --chip: #262a38; color-scheme: dark;
+  --red-ink: #ff6f7a; --blue-ink: #79a6ff;
+  --bg: #0f121c; --glow-red: rgba(205, 46, 58, .16); --glow-blue: rgba(0, 71, 160, .22);
+  --surface: #181c2a; --ink: #e9ebf3; --muted: #a0a6bb; --line: #2b3044;
+  --wood: #56b39c; --fire: #ef7158; --earth: #d9ad4c; --metal: #c3c7d2; --water: #7f9be0;
+  --chip: #252a3b; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7; }
+body { background-color: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7;
+  background-image: radial-gradient(60rem 40rem at -10% -10%, var(--glow-red), transparent 70%),
+                    radial-gradient(60rem 40rem at 110% 20%, var(--glow-blue), transparent 70%);
+  background-repeat: no-repeat; }
 .wrap { max-width: 920px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 56px; display: grid; gap: 28px; }
 h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.3; }
 h2 { font-size: 1.45rem; font-weight: 800; }
 h3 { font-size: 1.1rem; font-weight: 700; }
 p { margin: 0; }
 a { color: inherit; }
-:focus-visible { outline: 2px solid var(--seal); outline-offset: 2px; }
-.eyebrow { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+:focus-visible { outline: 2px solid var(--blue-ink); outline-offset: 2px; }
+.eyebrow { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--blue-ink); font-weight: 600; }
 .note { font-size: .82rem; color: var(--muted); }
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: grid; gap: 16px; min-width: 0; }
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.panel { position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 25px 22px 22px; display: grid; gap: 16px; min-width: 0; }
+.panel::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--grad); }
 .results { display: grid; gap: 28px; }
 .wrap > *, .results > *, .two > * { min-width: 0; }
 
 /* ---------- 사천에어쇼 배너 ---------- */
-.airshow { position: relative; overflow: hidden; border-radius: 12px; color: var(--sky-fg);
-  background: linear-gradient(160deg, var(--sky1) 0%, var(--sky2) 55%, var(--sky3) 100%);
-  padding: 22px 22px 20px; display: grid; gap: 10px; text-decoration: none; isolation: isolate; }
+.airshow { position: relative; overflow: hidden; border-radius: 12px; color: var(--on-grad);
+  background: var(--grad); padding: 22px 22px 20px; display: grid; gap: 10px; text-decoration: none; isolation: isolate;
+  transition: transform .2s ease, box-shadow .2s ease; }
+.airshow:hover { box-shadow: 0 10px 28px -12px rgba(0, 40, 110, .55); }
+@media (prefers-reduced-motion: no-preference) { .airshow:hover { transform: translateY(-2px); } }
 .airshow svg.trails { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
-.airshow .tag { justify-self: start; font-size: .7rem; letter-spacing: .14em; font-weight: 600; border: 1px solid rgba(255,255,255,.6); border-radius: 3px; padding: 1px 7px; }
+.airshow .tag { justify-self: start; font-size: .7rem; letter-spacing: .14em; font-weight: 600; border: 1px solid rgba(255,255,255,.7); border-radius: 3px; padding: 1px 7px; }
 .airshow .title { font-family: var(--f-body); font-weight: 600; font-size: clamp(1.6rem, 5vw, 2.4rem); letter-spacing: -.01em; line-height: 1.15; }
-.airshow .title b { color: var(--sky-accent); font-weight: 600; }
+.airshow .title b { font-weight: 600; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
 .airshow .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .95rem; font-weight: 500; }
 .airshow .acts { display: flex; flex-wrap: wrap; gap: 6px; }
-.airshow .acts span { background: rgba(9, 30, 60, .45); border-radius: 999px; padding: 2px 10px; font-size: .82rem; }
-.airshow .dday { position: absolute; top: 18px; right: 18px; font-family: var(--f-mono); font-size: 1.05rem; background: var(--sky-accent); color: var(--sky1); border-radius: 6px; padding: 4px 10px; font-weight: 500; }
-.airshow .foot { font-size: .78rem; opacity: .9; }
+.airshow .acts span { background: rgba(255, 255, 255, .18); border-radius: 999px; padding: 2px 10px; font-size: .82rem; }
+.airshow .dday { position: absolute; top: 18px; right: 18px; font-family: var(--f-mono); font-size: 1.05rem; background: #ffffff; color: var(--tg-blue); border-radius: 6px; padding: 4px 10px; font-weight: 500; }
+.airshow .foot { font-size: .82rem; font-weight: 500; }
+.airshow .foot .go { white-space: nowrap; border-bottom: 1px solid rgba(255,255,255,.8); }
 @media (prefers-reduced-motion: no-preference) {
   .airshow .jet { animation: fly 7s ease-in-out infinite alternate; }
 }
@@ -72,7 +94,7 @@ a { color: inherit; }
 
 /* ---------- 입력 폼 ---------- */
 .intro { display: grid; gap: 4px; }
-.intro h1 { font-size: 2rem; font-weight: 800; }
+.intro h1 { font-size: 2.2rem; font-weight: 800; justify-self: start; }
 form.input { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; }
 @media (max-width: 620px) { form.input { grid-template-columns: minmax(0, 1fr); } }
 .field { display: grid; gap: 6px; align-content: start; min-width: 0; }
@@ -82,24 +104,25 @@ form.input { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); ga
 .input input[type="text"], .input input[type="number"], .input input[type="time"], .input select {
   width: 100%; min-width: 0; font: 400 1rem var(--f-body); color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; }
-.input input:focus, .input select:focus { outline: 2px solid var(--ink); outline-offset: 0; border-color: var(--ink); }
+.input input:focus, .input select:focus { outline: 2px solid var(--blue-ink); outline-offset: 0; border-color: var(--blue-ink); }
 .ymd { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px; }
 .radio { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .radio label { display: grid; place-items: center; padding: 9px 0; cursor: pointer; font-weight: 500; color: var(--muted); }
 .radio input { position: absolute; opacity: 0; pointer-events: none; }
-.radio label:has(input:checked) { background: var(--ink); color: var(--surface); }
-.radio label:has(input:focus-visible) { outline: 2px solid var(--seal); outline-offset: -2px; }
+.radio label:has(input:checked) { background: var(--grad); color: var(--on-grad); }
+.radio label:has(input:focus-visible) { outline: 2px solid var(--blue-ink); outline-offset: -2px; }
 .time-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .time-row button { font: 500 .85rem var(--f-body); border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 8px; padding: 9px 12px; cursor: pointer; }
 .submit-row { grid-column: 1 / -1; display: grid; gap: 8px; }
-.submit-row button { font: 600 1.05rem var(--f-body); background: var(--ink); color: var(--surface); border: 0; border-radius: 8px; padding: 13px; cursor: pointer; }
-.submit-row button:hover { opacity: .92; }
-.error { color: var(--seal); font-size: .88rem; font-weight: 500; }
+.submit-row button { font: 600 1.05rem var(--f-body); background: var(--grad); background-size: 140% 100%; background-position: 0% 0;
+  color: var(--on-grad); border: 0; border-radius: 8px; padding: 13px; cursor: pointer; transition: background-position .3s ease; }
+.submit-row button:hover { background-position: 100% 0; }
+.error { color: var(--red-ink); font-size: .88rem; font-weight: 500; }
 
 /* ---------- 헤더 ---------- */
 header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
 .who { display: flex; align-items: center; gap: 14px; }
-.seal { width: 54px; height: 54px; border: 2.5px solid var(--seal); color: var(--seal); border-radius: 6px; display: grid; place-items: center;
+.seal { width: 54px; height: 54px; border: 2.5px solid var(--red-ink); color: var(--red-ink); border-radius: 6px; display: grid; place-items: center;
   font-family: var(--f-display); font-weight: 800; font-size: 1.05rem; line-height: 1.05; text-align: center; transform: rotate(-4deg); }
 .who h2 { font-size: 1.7rem; }
 .sample { font-size: .72rem; background: var(--chip); color: var(--muted); border-radius: 4px; padding: 2px 8px; font-weight: 600; }
@@ -107,10 +130,10 @@ header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: 
 /* ---------- 사주명식 ---------- */
 .pillars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .pillar { border: 1px solid var(--line); border-radius: 8px; padding: 10px 6px 12px; display: grid; justify-items: center; gap: 2px; text-align: center; }
-.pillar.me { border-color: var(--seal); box-shadow: inset 0 0 0 1px var(--seal); }
+.pillar.me { border: 2px solid transparent; background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--grad) border-box; }
 .pillar.empty { border-style: dashed; color: var(--muted); align-content: center; }
 .pillar .lbl { font-size: .78rem; color: var(--muted); font-weight: 600; }
-.pillar .me-tag { font-size: .68rem; color: var(--seal); font-weight: 600; min-height: 1.1em; }
+.pillar .me-tag { font-size: .68rem; color: var(--red-ink); font-weight: 600; min-height: 1.1em; }
 .pillar .hanja { font-family: var(--f-display); font-weight: 800; font-size: clamp(1.9rem, 7vw, 2.8rem); line-height: 1.15; }
 .pillar .god { font-size: .78rem; color: var(--muted); }
 .pillar .el { font-size: .7rem; font-weight: 600; }
@@ -131,11 +154,11 @@ header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: 
 .daeun-scroll { overflow-x: auto; padding-bottom: 4px; }
 .daeun { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(74px, 1fr); gap: 6px; direction: rtl; }
 .dy { direction: ltr; border: 1px solid var(--line); border-radius: 8px; padding: 8px 4px; display: grid; justify-items: center; gap: 0; text-align: center; font-variant-numeric: tabular-nums; }
-.dy.now { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.dy.now { border: 2px solid transparent; background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--grad) border-box; }
 .dy .age { font-family: var(--f-mono); font-size: .9rem; }
 .dy .hanja { font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; line-height: 1.2; }
 .dy .god, .dy .yr { font-size: .72rem; color: var(--muted); }
-.dy .now-tag { font-size: .68rem; font-weight: 600; min-height: 1.1em; }
+.dy .now-tag { font-size: .68rem; font-weight: 600; min-height: 1.1em; color: var(--blue-ink); }
 
 .traits { display: grid; gap: 14px; }
 .traits article { display: grid; gap: 4px; max-width: 68ch; }
@@ -145,36 +168,36 @@ header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: 
 @media (max-width: 520px) { .picker { grid-template-columns: repeat(4, minmax(0, 1fr)); } .picker .seg:last-child { grid-column: 1 / -1; } }
 .seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .seg button { font: 600 1rem var(--f-mono); padding: 8px 0; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.seg button[aria-pressed="true"] { background: var(--grad); color: var(--on-grad); }
 .versus { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: stretch; }
 @media (max-width: 560px) { .versus { grid-template-columns: minmax(0, 1fr); } .versus .vs { justify-self: center; } }
 .tcard { border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
 .tcard .src { font-size: .72rem; letter-spacing: .1em; color: var(--muted); font-weight: 600; }
 .tcard .code { font-family: var(--f-mono); font-size: 1.9rem; letter-spacing: .04em; line-height: 1.2; }
-.tcard .code .ch.diff { color: var(--seal); }
+.tcard .code .ch.diff { color: var(--red-ink); }
 .tcard .nick { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; }
 .tcard .grp { font-size: .78rem; color: var(--muted); }
 .tcard .sum { font-size: .9rem; }
-.tcard a { font-size: .82rem; color: var(--muted); }
+.tcard a { font-size: .82rem; color: var(--blue-ink); }
 .vs { align-self: center; display: grid; justify-items: center; gap: 2px; }
-.vs .score { font-family: var(--f-mono); font-size: 1.6rem; }
+.vs .score { font-family: var(--f-mono); font-size: 1.8rem; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .vs .cap { font-size: .75rem; color: var(--muted); }
 .axes { display: grid; gap: 14px; }
 .axis { display: grid; gap: 6px; }
 .axis .head { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem; }
 .axis .head b { font-family: var(--f-mono); font-weight: 500; }
 .axis .bar { height: 12px; border-radius: 999px; background: var(--chip); overflow: hidden; display: flex; }
-.axis .bar .l { background: var(--ink); }
+.axis .bar .l { background: var(--grad); border-radius: 999px; }
 .axis .why { font-size: .78rem; color: var(--muted); }
 .axis .verdict { font-size: .75rem; font-weight: 600; padding: 0 7px; border-radius: 4px; }
-.verdict.ok { background: color-mix(in srgb, var(--wood) 18%, transparent); color: var(--wood); }
-.verdict.no { background: color-mix(in srgb, var(--seal) 15%, transparent); color: var(--seal); }
+.verdict.ok { background: color-mix(in srgb, var(--blue-ink) 15%, transparent); color: var(--blue-ink); }
+.verdict.no { background: color-mix(in srgb, var(--red-ink) 15%, transparent); color: var(--red-ink); }
 .verdict.na { background: var(--chip); color: var(--muted); }
 
 /* ---------- 상세 풀이 ---------- */
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 .tabs button { font: 500 .9rem var(--f-body); border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 5px 14px; cursor: pointer; }
-.tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.tabs button[aria-selected="true"] { background: var(--grad); color: var(--on-grad); border-color: transparent; }
 .reading { display: grid; gap: 20px; }
 .reading article { display: grid; gap: 6px; max-width: 68ch; }
 .reading article p { white-space: pre-line; }
@@ -184,9 +207,9 @@ header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: 
 
 <div class="wrap">
 
-  <a class="airshow" href="https://www.ytn.co.kr/_ln/0101_202609071401137873" target="_blank" rel="noopener" aria-label="2026 사천에어쇼 안내 기사 열기">
+  <a class="airshow" href="https://airshow.sacheon.go.kr/" target="_blank" rel="noopener" aria-label="2026 사천에어쇼 공식 누리집 열기 (새 창)">
     <svg class="trails" viewBox="0 0 600 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <g fill="none" stroke="#ffffff" stroke-linecap="round" opacity=".55">
+      <g fill="none" stroke="#ffffff" stroke-linecap="round" opacity=".3">
         <path d="M-20 200 C 160 190, 300 120, 470 40" stroke-width="7"/>
         <path d="M-20 214 C 170 204, 315 134, 488 56" stroke-width="7" opacity=".8"/>
         <path d="M-20 228 C 180 218, 330 148, 506 72" stroke-width="7" opacity=".6"/>
@@ -204,13 +227,13 @@ header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: 
     <div class="title">2026 <b>사천에어쇼</b></div>
     <div class="meta"><span>2026. 10. 22(목) – 10. 25(일)</span><span>경남 사천 공군기지</span></div>
     <div class="acts"><span>블랙이글스</span><span>KF-21</span><span>해외 민간 곡예비행팀</span><span>고공강하 · 군악 의장 시범</span></div>
-    <div class="foot">관람 사전 등록은 사천에어쇼 공식 누리집에서 · 주최 공군 · 경상남도 · 사천시 · KAI</div>
+    <div class="foot">주최 공군 · 경상남도 · 사천시 · KAI &nbsp;<span class="go">공식 누리집에서 관람 사전 등록 ↗</span></div>
   </a>
 
   <section class="panel">
     <div class="intro">
       <div class="eyebrow">평생사주 × MBTI</div>
-      <h1>평생사주</h1>
+      <h1 class="grad-text">평생사주</h1>
       <p class="note">생년월일시로 사주명식, 오행 분포, 대운 흐름을 계산하고 MBTI와 비교합니다.</p>
     </div>
     <form class="input" id="form" novalidate>
@@ -279,7 +302,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: 
       <div class="panel">
         <h2>사주명식</h2>
         <div class="pillars" id="pillars"></div>
-        <p class="note">오른쪽부터 년주 · 월주 · 일주 · 시주. 붉은 테두리가 일간(나)이며, 지지 아래 십성은 지장간 본기 기준입니다.</p>
+        <p class="note">오른쪽부터 년주 · 월주 · 일주 · 시주. 빨강·파랑 테두리가 일간(나)이며, 지지 아래 십성은 지장간 본기 기준입니다.</p>
       </div>
       <div class="panel">
         <h2>오행 분포</h2>
@@ -701,7 +724,7 @@ $("form").addEventListener("submit", (ev) => {
 $("sources").innerHTML = `<div>만세력 계산: <a href="https://github.com/6tail/lunar-javascript" target="_blank" rel="noopener">lunar-javascript 1.6.13</a> (절기 기준 년·월주, 子시 23:30 기준, 30분 경도 보정)</div>
   ${DATA.public ? "" : `<div>사주 원문: <a href="https://www.unsin.co.kr/unse/saju/total/form" target="_blank" rel="noopener">운세의신 평생사주</a> (Firecrawl 수집, ${esc(DATA.crawled_at)})</div>`}
   <div>MBTI: <a href="${esc(mbti.source)}" target="_blank" rel="noopener">16Personalities 성격 유형</a></div>
-  <div>사천에어쇼: <a href="https://www.ytn.co.kr/_ln/0101_202609071401137873" target="_blank" rel="noopener">YTN 2026.09.07 보도</a>, <a href="https://www.fnnews.com/news/202609071028509107" target="_blank" rel="noopener">파이낸셜뉴스</a></div>`;
+  <div>사천에어쇼: <a href="https://airshow.sacheon.go.kr/" target="_blank" rel="noopener">공식 누리집</a>, <a href="https://www.ytn.co.kr/_ln/0101_202609071401137873" target="_blank" rel="noopener">YTN 2026.09.07 보도</a>, <a href="https://www.fnnews.com/news/202609071028509107" target="_blank" rel="noopener">파이낸셜뉴스</a></div>`;
 
 // ---------- 시작: 저장된 입력 또는 예시 ----------
 (function start() {
