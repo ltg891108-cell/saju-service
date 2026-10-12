@@ -88,7 +88,7 @@ a { color: inherit; }
 @media (prefers-reduced-motion: no-preference) {
   .airshow .jet { animation: fly 7s ease-in-out infinite alternate; }
 }
-@keyframes fly { from { transform: translate(0, 0); } to { transform: translate(-14px, 6px); } }
+@keyframes fly { from { transform: translate(0, 0); } to { transform: translate(6px, -3px); } }
 
 /* ---------- 입력 폼 ---------- */
 .intro { display: grid; gap: 4px; }
@@ -206,18 +206,25 @@ header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: 
 <div class="wrap">
 
   <a class="airshow" href="https://airshow.sacheon.go.kr/" target="_blank" rel="noopener" aria-label="2026 사천에어쇼 공식 누리집 열기 (새 창)">
-    <svg class="trails" viewBox="0 0 600 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <svg class="trails" viewBox="0 -18 600 238" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <g fill="none" stroke="#ffffff" stroke-linecap="round" opacity=".3">
         <path d="M-20 200 C 160 190, 300 120, 470 40" stroke-width="7"/>
         <path d="M-20 214 C 170 204, 315 134, 488 56" stroke-width="7" opacity=".8"/>
         <path d="M-20 228 C 180 218, 330 148, 506 72" stroke-width="7" opacity=".6"/>
         <path d="M-20 242 C 190 232, 345 162, 524 88" stroke-width="7" opacity=".45"/>
       </g>
-      <g class="jet" fill="#ffffff">
-        <path d="M470 40 l22 -14 l-6 12 l12 2 l-12 4 l2 10 z"/>
-        <path d="M488 56 l22 -14 l-6 12 l12 2 l-12 4 l2 10 z"/>
-        <path d="M506 72 l22 -14 l-6 12 l12 2 l-12 4 l2 10 z"/>
-        <path d="M524 88 l22 -14 l-6 12 l12 2 l-12 4 l2 10 z"/>
+      <!-- 종이비행기: 기수가 +x 방향인 모양을 비행운 끝점으로 옮기고 비행운 진행 방향(약 -25°)으로 회전 -->
+      <defs>
+        <g id="plane">
+          <path d="M20 0 L-8 -9 L-2 0 Z" fill="#ffffff"/>
+          <path d="M20 0 L-2 0 L-6 8 Z" fill="#ffffff" opacity=".75"/>
+        </g>
+      </defs>
+      <g class="jet">
+        <use href="#plane" transform="translate(470 40) rotate(-25)"/>
+        <use href="#plane" transform="translate(488 56) rotate(-25)"/>
+        <use href="#plane" transform="translate(506 72) rotate(-25)"/>
+        <use href="#plane" transform="translate(524 88) rotate(-25)"/>
       </g>
     </svg>
     <span class="tag">홍보</span>
