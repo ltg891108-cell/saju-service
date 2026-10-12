@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>사주 × MBTI 리포트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 배너 → 입력 폼 → 사주명식 · 오행 → 대운 → 일간 해석 → MBTI 비교 → 상세 풀이. 먹색 잉크 + 오방색 원소 표시, 인주(朱) 도장은 이름에만. */
+:root {
+  --bg: #f1f2f5;
+  --surface: #ffffff;
+  --ink: #1b1f2e;
+  --muted: #5d6275;
+  --line: #d9dbe3;
+  --seal: #b8392b;
+  --wood: #2f7d6b; --fire: #c4452f; --earth: #b8892a; --metal: #8a8f9e; --water: #24365f;
+  --chip: #e6e8ef;
+  --sky1: #0f3c74; --sky2: #2f7cc1; --sky3: #9fd0f0; --sky-fg: #ffffff; --sky-accent: #ffd34d;
+  --f-display: "Nanum Myeongjo", "Batang", "AppleMyungjo", serif;
+  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11131b; --surface: #1a1d28; --ink: #e8e9ef; --muted: #9da2b4; --line: #2c3040;
+    --seal: #e0614f; --wood: #56b39c; --fire: #ef7158; --earth: #d9ad4c; --metal: #c3c7d2; --water: #7f9be0;
+    --chip: #262a38; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11131b; --surface: #1a1d28; --ink: #e8e9ef; --muted: #9da2b4; --line: #2c3040;
+  --seal: #e0614f; --wood: #56b39c; --fire: #ef7158; --earth: #d9ad4c; --metal: #c3c7d2; --water: #7f9be0;
+  --chip: #262a38; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7; }
+.wrap { max-width: 920px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 56px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.3; }
+h2 { font-size: 1.45rem; font-weight: 800; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--seal); outline-offset: 2px; }
+.eyebrow { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: .82rem; color: var(--muted); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: grid; gap: 16px; min-width: 0; }
+.results { display: grid; gap: 28px; }
+.wrap > *, .results > *, .two > * { min-width: 0; }
+
+/* ---------- 사천에어쇼 배너 ---------- */
+.airshow { position: relative; overflow: hidden; border-radius: 12px; color: var(--sky-fg);
+  background: linear-gradient(160deg, var(--sky1) 0%, var(--sky2) 55%, var(--sky3) 100%);
+  padding: 22px 22px 20px; display: grid; gap: 10px; text-decoration: none; isolation: isolate; }
+.airshow svg.trails { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.airshow .tag { justify-self: start; font-size: .7rem; letter-spacing: .14em; font-weight: 600; border: 1px solid rgba(255,255,255,.6); border-radius: 3px; padding: 1px 7px; }
+.airshow .title { font-family: var(--f-body); font-weight: 600; font-size: clamp(1.6rem, 5vw, 2.4rem); letter-spacing: -.01em; line-height: 1.15; }
+.airshow .title b { color: var(--sky-accent); font-weight: 600; }
+.airshow .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .95rem; font-weight: 500; }
+.airshow .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.airshow .acts span { background: rgba(9, 30, 60, .45); border-radius: 999px; padding: 2px 10px; font-size: .82rem; }
+.airshow .dday { position: absolute; top: 18px; right: 18px; font-family: var(--f-mono); font-size: 1.05rem; background: var(--sky-accent); color: var(--sky1); border-radius: 6px; padding: 4px 10px; font-weight: 500; }
+.airshow .foot { font-size: .78rem; opacity: .9; }
+@media (prefers-reduced-motion: no-preference) {
+  .airshow .jet { animation: fly 7s ease-in-out infinite alternate; }
+}
+@keyframes fly { from { transform: translate(0, 0); } to { transform: translate(-14px, 6px); } }
+
+/* ---------- 입력 폼 ---------- */
+.intro { display: grid; gap: 4px; }
+.intro h1 { font-size: 2rem; font-weight: 800; }
+form.input { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; }
+@media (max-width: 620px) { form.input { grid-template-columns: minmax(0, 1fr); } }
+.field { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+.field > .lbl { font-size: .85rem; font-weight: 600; }
+.field .opt { font-weight: 400; color: var(--muted); }
+.input input[type="text"], .input input[type="number"], .input input[type="time"], .input select {
+  width: 100%; min-width: 0; font: 400 1rem var(--f-body); color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; }
+.input input:focus, .input select:focus { outline: 2px solid var(--ink); outline-offset: 0; border-color: var(--ink); }
+.ymd { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px; }
+.radio { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.radio label { display: grid; place-items: center; padding: 9px 0; cursor: pointer; font-weight: 500; color: var(--muted); }
+.radio input { position: absolute; opacity: 0; pointer-events: none; }
+.radio label:has(input:checked) { background: var(--ink); color: var(--surface); }
+.radio label:has(input:focus-visible) { outline: 2px solid var(--seal); outline-offset: -2px; }
+.time-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.time-row button { font: 500 .85rem var(--f-body); border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 8px; padding: 9px 12px; cursor: pointer; }
+.submit-row { grid-column: 1 / -1; display: grid; gap: 8px; }
+.submit-row button { font: 600 1.05rem var(--f-body); background: var(--ink); color: var(--surface); border: 0; border-radius: 8px; padding: 13px; cursor: pointer; }
+.submit-row button:hover { opacity: .92; }
+.error { color: var(--seal); font-size: .88rem; font-weight: 500; }
+
+/* ---------- 헤더 ---------- */
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
+.who { display: flex; align-items: center; gap: 14px; }
+.seal { width: 54px; height: 54px; border: 2.5px solid var(--seal); color: var(--seal); border-radius: 6px; display: grid; place-items: center;
+  font-family: var(--f-display); font-weight: 800; font-size: 1.05rem; line-height: 1.05; text-align: center; transform: rotate(-4deg); }
+.who h2 { font-size: 1.7rem; }
+.sample { font-size: .72rem; background: var(--chip); color: var(--muted); border-radius: 4px; padding: 2px 8px; font-weight: 600; }
+
+/* ---------- 사주명식 ---------- */
+.pillars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pillar { border: 1px solid var(--line); border-radius: 8px; padding: 10px 6px 12px; display: grid; justify-items: center; gap: 2px; text-align: center; }
+.pillar.me { border-color: var(--seal); box-shadow: inset 0 0 0 1px var(--seal); }
+.pillar.empty { border-style: dashed; color: var(--muted); align-content: center; }
+.pillar .lbl { font-size: .78rem; color: var(--muted); font-weight: 600; }
+.pillar .me-tag { font-size: .68rem; color: var(--seal); font-weight: 600; min-height: 1.1em; }
+.pillar .hanja { font-family: var(--f-display); font-weight: 800; font-size: clamp(1.9rem, 7vw, 2.8rem); line-height: 1.15; }
+.pillar .god { font-size: .78rem; color: var(--muted); }
+.pillar .el { font-size: .7rem; font-weight: 600; }
+.e-木 { color: var(--wood); } .e-火 { color: var(--fire); } .e-土 { color: var(--earth); } .e-金 { color: var(--metal); } .e-水 { color: var(--water); }
+.b-木 { background: var(--wood); } .b-火 { background: var(--fire); } .b-土 { background: var(--earth); } .b-金 { background: var(--metal); } .b-水 { background: var(--water); }
+
+.elements { display: grid; gap: 8px; }
+.erow { display: grid; grid-template-columns: 2.4em minmax(0, 1fr) 4.2em; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; }
+.erow .k { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; }
+.erow .track { height: 10px; background: var(--chip); border-radius: 999px; overflow: hidden; }
+.erow .fill { display: block; height: 100%; border-radius: 999px; }
+.erow .v { font-family: var(--f-mono); font-size: .85rem; text-align: right; color: var(--muted); }
+
+.two { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 720px) { .two { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- 대운 ---------- */
+.daeun-scroll { overflow-x: auto; padding-bottom: 4px; }
+.daeun { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(74px, 1fr); gap: 6px; direction: rtl; }
+.dy { direction: ltr; border: 1px solid var(--line); border-radius: 8px; padding: 8px 4px; display: grid; justify-items: center; gap: 0; text-align: center; font-variant-numeric: tabular-nums; }
+.dy.now { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.dy .age { font-family: var(--f-mono); font-size: .9rem; }
+.dy .hanja { font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; line-height: 1.2; }
+.dy .god, .dy .yr { font-size: .72rem; color: var(--muted); }
+.dy .now-tag { font-size: .68rem; font-weight: 600; min-height: 1.1em; }
+
+.traits { display: grid; gap: 14px; }
+.traits article { display: grid; gap: 4px; max-width: 68ch; }
+
+/* ---------- MBTI ---------- */
+.picker { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .picker { grid-template-columns: repeat(4, minmax(0, 1fr)); } .picker .seg:last-child { grid-column: 1 / -1; } }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: 600 1rem var(--f-mono); padding: 8px 0; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.versus { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: stretch; }
+@media (max-width: 560px) { .versus { grid-template-columns: minmax(0, 1fr); } .versus .vs { justify-self: center; } }
+.tcard { border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.tcard .src { font-size: .72rem; letter-spacing: .1em; color: var(--muted); font-weight: 600; }
+.tcard .code { font-family: var(--f-mono); font-size: 1.9rem; letter-spacing: .04em; line-height: 1.2; }
+.tcard .code .ch.diff { color: var(--seal); }
+.tcard .nick { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; }
+.tcard .grp { font-size: .78rem; color: var(--muted); }
+.tcard .sum { font-size: .9rem; }
+.tcard a { font-size: .82rem; color: var(--muted); }
+.vs { align-self: center; display: grid; justify-items: center; gap: 2px; }
+.vs .score { font-family: var(--f-mono); font-size: 1.6rem; }
+.vs .cap { font-size: .75rem; color: var(--muted); }
+.axes { display: grid; gap: 14px; }
+.axis { display: grid; gap: 6px; }
+.axis .head { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem; }
+.axis .head b { font-family: var(--f-mono); font-weight: 500; }
+.axis .bar { height: 12px; border-radius: 999px; background: var(--chip); overflow: hidden; display: flex; }
+.axis .bar .l { background: var(--ink); }
+.axis .why { font-size: .78rem; color: var(--muted); }
+.axis .verdict { font-size: .75rem; font-weight: 600; padding: 0 7px; border-radius: 4px; }
+.verdict.ok { background: color-mix(in srgb, var(--wood) 18%, transparent); color: var(--wood); }
+.verdict.no { background: color-mix(in srgb, var(--seal) 15%, transparent); color: var(--seal); }
+.verdict.na { background: var(--chip); color: var(--muted); }
+
+/* ---------- 상세 풀이 ---------- */
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs button { font: 500 .9rem var(--f-body); border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 5px 14px; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.reading { display: grid; gap: 20px; }
+.reading article { display: grid; gap: 6px; max-width: 68ch; }
+.reading article p { white-space: pre-line; }
+.cmd { font-family: var(--f-mono); font-size: .82rem; background: var(--chip); border-radius: 6px; padding: 10px 12px; overflow-x: auto; white-space: pre; }
+.src-list { font-size: .8rem; color: var(--muted); display: grid; gap: 2px; }
+</style>
+
+<div class="wrap">
+
+  <a class="airshow" href="https://www.ytn.co.kr/_ln/0101_202609071401137873" target="_blank" rel="noopener" aria-label="2026 사천에어쇼 안내 기사 열기">
+    <svg class="trails" viewBox="0 0 600 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g fill="none" stroke="#ffffff" stroke-linecap="round" opacity=".55">
+        <path d="M-20 200 C 160 190, 300 120, 470 40" stroke-width="7"/>
+        <path d="M-20 214 C 170 204, 315 134, 488 56" stroke-width="7" opacity=".8"/>
+        <path d="M-20 228 C 180 218, 330 148, 506 72" stroke-width="7" opacity=".6"/>
+        <path d="M-20 242 C 190 232, 345 162, 524 88" stroke-width="7" opacity=".45"/>
+      </g>
+      <g class="jet" fill="#ffffff">
+        <path d="M470 40 l22 -14 l-6 12 l12 2 l-12 4 l2 10 z"/>
+        <path d="M488 56 l22 -14 l-6 12 l12 2 l-12 4 l2 10 z"/>
+        <path d="M506 72 l22 -14 l-6 12 l12 2 l-12 4 l2 10 z"/>
+        <path d="M524 88 l22 -14 l-6 12 l12 2 l-12 4 l2 10 z"/>
+      </g>
+    </svg>
+    <span class="tag">홍보</span>
+    <span class="dday" id="dday">D-?</span>
+    <div class="title">2026 <b>사천에어쇼</b></div>
+    <div class="meta"><span>2026. 10. 22(목) – 10. 25(일)</span><span>경남 사천 공군기지</span></div>
+    <div class="acts"><span>블랙이글스</span><span>KF-21</span><span>해외 민간 곡예비행팀</span><span>고공강하 · 군악 의장 시범</span></div>
+    <div class="foot">관람 사전 등록은 사천에어쇼 공식 누리집에서 · 주최 공군 · 경상남도 · 사천시 · KAI</div>
+  </a>
+
+  <section class="panel">
+    <div class="intro">
+      <div class="eyebrow">평생사주 × MBTI</div>
+      <h1>평생사주</h1>
+      <p class="note">생년월일시로 사주명식, 오행 분포, 대운 흐름을 계산하고 MBTI와 비교합니다.</p>
+    </div>
+    <form class="input" id="form" novalidate>
+      <div class="field">
+        <label class="lbl" for="f-name">이름 <span class="opt">(선택)</span></label>
+        <input type="text" id="f-name" name="name" maxlength="20" placeholder="이름" autocomplete="off">
+      </div>
+      <div class="field">
+        <span class="lbl" id="gender-lbl">성별</span>
+        <div class="radio" role="radiogroup" aria-labelledby="gender-lbl">
+          <label><input type="radio" id="f-male" name="gender" value="male" checked> 남자</label>
+          <label><input type="radio" id="f-female" name="gender" value="female"> 여자</label>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl" id="ymd-lbl">생년월일</span>
+        <div class="ymd" role="group" aria-labelledby="ymd-lbl">
+          <input type="number" id="f-year" name="year" min="1900" max="2050" placeholder="년 (1990)" inputmode="numeric" aria-label="년" required>
+          <input type="number" id="f-month" name="month" min="1" max="12" placeholder="월" inputmode="numeric" aria-label="월" required>
+          <input type="number" id="f-day" name="day" min="1" max="31" placeholder="일" inputmode="numeric" aria-label="일" required>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl" for="f-calendar">양력/음력</label>
+        <select id="f-calendar" name="calendar">
+          <option value="solar">양력</option>
+          <option value="lunar">음력 (평달)</option>
+          <option value="lunar-leap">음력 (윤달)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl" for="f-time">태어난 시각 <span class="opt">(선택)</span></label>
+        <div class="time-row">
+          <input type="time" id="f-time" name="time">
+          <button type="button" id="f-time-clear">모름</button>
+        </div>
+        <span class="note">모르면 비워두세요. 시주 없이 계산합니다.</span>
+      </div>
+      <div class="field">
+        <label class="lbl" for="f-mbti">내 MBTI <span class="opt">(선택)</span></label>
+        <select id="f-mbti" name="mbti"></select>
+        <span class="note">결과 화면에서도 바꿀 수 있어요.</span>
+      </div>
+      <div class="submit-row">
+        <p class="error" id="form-error" role="alert" hidden></p>
+        <button type="submit">사주 보기</button>
+        <p class="note">사주 풀이는 오락·참고용이며 건강·재정 결정의 근거가 될 수 없습니다.</p>
+      </div>
+    </form>
+  </section>
+
+  <div class="results" id="results">
+    <header class="top">
+      <div class="who">
+        <div class="seal" id="seal" aria-hidden="true"></div>
+        <div>
+          <div class="eyebrow">사주 결과</div>
+          <h2 id="name"></h2>
+          <div class="note" id="birth"></div>
+        </div>
+      </div>
+      <span class="sample" id="sample-chip" hidden>예시 입력 · 위에서 내 정보로 바꿔보세요</span>
+    </header>
+
+    <section class="two">
+      <div class="panel">
+        <h2>사주명식</h2>
+        <div class="pillars" id="pillars"></div>
+        <p class="note">오른쪽부터 년주 · 월주 · 일주 · 시주. 붉은 테두리가 일간(나)이며, 지지 아래 십성은 지장간 본기 기준입니다.</p>
+      </div>
+      <div class="panel">
+        <h2>오행 분포</h2>
+        <div class="elements" id="elements"></div>
+        <p class="note" id="elements-note"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div>
+        <h2>대운 흐름</h2>
+        <p class="note" id="daeun-note"></p>
+      </div>
+      <div class="daeun-scroll"><div class="daeun" id="daeun"></div></div>
+    </section>
+
+    <section class="panel">
+      <h2>타고난 기질</h2>
+      <div class="traits" id="traits"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="mbti-h">
+      <div>
+        <div class="eyebrow">MBTI · 16Personalities 최신 5글자 표기(-A / -T)</div>
+        <h2 id="mbti-h">내 MBTI와 사주가 말하는 MBTI</h2>
+      </div>
+      <div class="picker" id="picker"></div>
+      <div class="versus">
+        <div class="tcard" id="card-me"></div>
+        <div class="vs"><div class="score" id="score"></div><div class="cap">일치</div></div>
+        <div class="tcard" id="card-saju"></div>
+      </div>
+      <div class="axes" id="axes"></div>
+      <p class="note">사주 기반 MBTI는 십성과 오행 비중으로 각 지표 점수를 매긴 재미용 추정입니다. 과학적 근거는 없습니다. -A/-T는 비겁·인성(나를 돕는 기운)이 강한 신강이면 A, 약하면 T로 봤습니다.</p>
+    </section>
+
+    <section class="panel" id="reading-section" aria-labelledby="read-h">
+      <div>
+        <div class="eyebrow">운세의신 평생사주 원문</div>
+        <h2 id="read-h">상세 풀이</h2>
+      </div>
+      <div id="reading-wrap"></div>
+    </section>
+  </div>
+
+  <footer class="src-list" id="sources"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.13/lunar.js"></script>
+<script>
+const DATA = {"mbti": {"source": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9-%EC%9C%A0%ED%98%95", "identity": {"A": "자기주장형(Assertive)", "T": "신중형(Turbulent)"}, "types": [{"type": "INTJ", "variants": ["INTJ-A", "INTJ-T"], "nickname": "전략가", "group": "분석가형", "summary": "모든 일에 대해 계획을 세우는 상상력이 풍부한 전략가입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-intj"}, {"type": "INTP", "variants": ["INTP-A", "INTP-T"], "nickname": "논리술사", "group": "분석가형", "summary": "지식을 끝없이 갈망하는 혁신적인 발명가입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-intp"}, {"type": "ENTJ", "variants": ["ENTJ-A", "ENTJ-T"], "nickname": "통솔자", "group": "분석가형", "summary": "항상 문제 해결 방법을 찾아내는 성격으로, 대담하고 상상력이 풍부하며 의지가 강력한 지도자입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-entj"}, {"type": "ENTP", "variants": ["ENTP-A", "ENTP-T"], "nickname": "변론가", "group": "분석가형", "summary": "지적 도전을 즐기는 영리하고 호기심이 많은 사색가입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-entp"}, {"type": "INFJ", "variants": ["INFJ-A", "INFJ-T"], "nickname": "옹호자", "group": "외교관형", "summary": "차분하고 신비한 분위기를 풍기는 성격으로, 다른 사람들에게 의욕을 불어넣는 이상주의자입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-infj"}, {"type": "INFP", "variants": ["INFP-A", "INFP-T"], "nickname": "중재자", "group": "외교관형", "summary": "항상 선을 행할 준비가 되어 있는 부드럽고 친절한 이타주의자입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-infp"}, {"type": "ENFJ", "variants": ["ENFJ-A", "ENFJ-T"], "nickname": "선도자", "group": "외교관형", "summary": "청중을 사로잡고 의욕을 불어넣는 카리스마 넘치는 지도자입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-enfj"}, {"type": "ENFP", "variants": ["ENFP-A", "ENFP-T"], "nickname": "활동가", "group": "외교관형", "summary": "열정적이고 창의적인 성격으로, 긍정적으로 삶을 바라보는 사교적이면서도 자유로운 영혼입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-enfp"}, {"type": "ISTJ", "variants": ["ISTJ-A", "ISTJ-T"], "nickname": "현실주의자", "group": "관리자형", "summary": "사실을 중시하고 실용적인 성향을 지닌 믿음직한 현실주의자입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-istj"}, {"type": "ISFJ", "variants": ["ISFJ-A", "ISFJ-T"], "nickname": "수호자", "group": "관리자형", "summary": "주변 사람들을 보호할 준비가 되어 있는 헌신적이고 따뜻한 보호자입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-isfj"}, {"type": "ESTJ", "variants": ["ESTJ-A", "ESTJ-T"], "nickname": "경영자", "group": "관리자형", "summary": "사물과 사람을 관리하는 데 뛰어난 능력을 지닌 경영자입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-estj"}, {"type": "ESFJ", "variants": ["ESFJ-A", "ESFJ-T"], "nickname": "집정관", "group": "관리자형", "summary": "배려심이 넘치고 항상 다른 사람들을 도울 준비가 되어 있는 성격으로, 인기가 많고 사교성이 뛰어난 성격입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-esfj"}, {"type": "ISTP", "variants": ["ISTP-A", "ISTP-T"], "nickname": "장인", "group": "탐험가형", "summary": "대담하면서도 현실적인 성격으로, 모든 종류의 도구를 자유자재로 다루는 장인입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-istp"}, {"type": "ISFP", "variants": ["ISFP-A", "ISFP-T"], "nickname": "모험가", "group": "탐험가형", "summary": "항상 새로운 경험을 추구하는 유연하고 매력 넘치는 예술가입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-isfp"}, {"type": "ESTP", "variants": ["ESTP-A", "ESTP-T"], "nickname": "사업가", "group": "탐험가형", "summary": "영리하고 에너지 넘치며 관찰력이 뛰어난 성격으로, 스릴 넘치는 삶을 진정으로 즐기는 성격입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-estp"}, {"type": "ESFP", "variants": ["ESFP-A", "ESFP-T"], "nickname": "연예인", "group": "탐험가형", "summary": "즉흥적이고 넘치는 에너지와 열정으로 주변 사람들을 즐겁게 하는 성격입니다.", "url": "https://www.16personalities.com/ko/%EC%84%B1%EA%B2%A9%EC%9C%A0%ED%98%95-esfp"}]}, "unsin": [], "public": true, "crawled_at": "2026-10-12"};
+
+const STEM_EL = { 甲:"木", 乙:"木", 丙:"火", 丁:"火", 戊:"土", 己:"土", 庚:"金", 辛:"金", 壬:"水", 癸:"水" };
+const BRANCH_EL = { 寅:"木", 卯:"木", 巳:"火", 午:"火", 辰:"土", 戌:"土", 丑:"土", 未:"土", 申:"金", 酉:"金", 亥:"水", 子:"水" };
+const HANGUL = { 甲:"갑", 乙:"을", 丙:"병", 丁:"정", 戊:"무", 己:"기", 庚:"경", 辛:"신", 壬:"임", 癸:"계",
+  子:"자", 丑:"축", 寅:"인", 卯:"묘", 辰:"진", 巳:"사", 午:"오", 未:"미", 申:"신", 酉:"유", 戌:"술", 亥:"해" };
+const SHISHEN = { 比肩:"비견", 劫财:"겁재", 劫財:"겁재", 食神:"식신", 伤官:"상관", 傷官:"상관", 偏财:"편재", 偏財:"편재",
+  正财:"정재", 正財:"정재", 七杀:"편관", 七殺:"편관", 正官:"정관", 偏印:"편인", 正印:"정인", 日主:"일간" };
+const MOTHER = { 木:"水", 火:"木", 土:"火", 金:"土", 水:"金" };
+const ELEMENTS = ["木", "火", "土", "金", "水"];
+const EL_NAME = { 木:"목", 火:"화", 土:"토", 金:"금", 水:"수" };
+const DAY_MASTER = {
+  甲: "곧게 뻗는 큰 나무입니다. 추진력과 리더십이 있고 원칙을 중시합니다. 쉽게 굽히지 않아 고집으로 보일 때가 있습니다.",
+  乙: "덩굴과 화초처럼 유연합니다. 적응력이 뛰어나고 사람 사이를 잘 엮습니다. 겉보다 속이 질긴 편입니다.",
+  丙: "하늘의 태양처럼 밝고 솔직합니다. 표현력이 크고 주변을 환하게 만듭니다. 열정이 앞서 마무리가 약해질 수 있습니다.",
+  丁: "등불과 촛불처럼 섬세하고 따뜻합니다. 한 가지에 깊이 몰입하는 힘이 있습니다. 감정을 속으로 오래 품는 편입니다.",
+  戊: "큰 산과 들처럼 듬직하고 포용력이 큽니다. 믿고 기댈 수 있는 사람으로 통합니다. 변화에 느리고 속내를 잘 드러내지 않습니다.",
+  己: "논밭의 흙처럼 실속 있고 꼼꼼합니다. 사람과 일을 키워내는 재주가 있습니다. 걱정이 많아질 수 있습니다.",
+  庚: "무쇠와 바위처럼 결단력이 있습니다. 의리와 정의감이 강합니다. 말이 직설적이라 날카롭게 보일 수 있습니다.",
+  辛: "보석과 칼날처럼 예리한 감각을 지녔습니다. 자존심이 강하고 완성도를 추구합니다. 예민함이 장점이자 약점입니다.",
+  壬: "큰 강과 바다처럼 포부가 크고 지혜롭습니다. 흐름을 읽는 눈이 있습니다. 한곳에 오래 머무르기 어려워합니다.",
+  癸: "비와 이슬처럼 조용하고 직관이 뛰어납니다. 배려가 깊고 분위기를 잘 읽습니다. 생각이 많아 결정을 미루기도 합니다.",
+};
+const EL_ADVICE = {
+  木: { many: "계획과 시작은 잘하지만 벌여 놓은 일이 많아질 수 있어요. 하나씩 마무리하는 습관이 도움이 됩니다.", few: "새로 시작하는 힘이 약할 수 있어요. 꾸준한 배움과 작은 도전이 성장 동력이 됩니다." },
+  火: { many: "열정과 표현이 넘쳐요. 감정의 기복을 다스리면 더 멀리 갑니다.", few: "자신을 드러내는 데 소극적일 수 있어요. 성과를 말로 표현하는 연습이 좋습니다." },
+  土: { many: "신중하고 안정적이지만 변화에 둔할 수 있어요. 가끔은 낯선 선택을 해보세요.", few: "중심을 잡는 힘이 약할 수 있어요. 생활 루틴을 만들어 두면 흔들림이 줄어듭니다." },
+  金: { many: "원칙과 결단이 강해요. 융통성을 함께 챙기면 관계가 부드러워집니다.", few: "맺고 끊음이 약할 수 있어요. 마감과 기준을 스스로 정해 두면 좋습니다." },
+  水: { many: "생각과 지혜가 깊지만 걱정이 많아질 수 있어요. 몸을 움직이는 시간이 균형을 잡아줍니다.", few: "쉬어 가는 여유가 부족할 수 있어요. 휴식과 유연함을 의식적으로 챙기세요." },
+};
+const AXES = [
+  { pair: ["E", "I"], names: ["외향", "내향"], gods: { E: ["비견", "겁재", "식신", "상관", "편재"], I: ["편인", "정인", "정관", "정재"] }, els: { E: ["木", "火"], I: ["金", "水"] } },
+  { pair: ["S", "N"], names: ["감각", "직관"], gods: { S: ["정재", "편재", "정관", "식신"], N: ["편인", "정인", "상관", "편관"] }, els: { S: ["土", "金"], N: ["水", "木"] } },
+  { pair: ["T", "F"], names: ["사고", "감정"], gods: { T: ["편관", "정관", "편재", "겁재"], F: ["식신", "상관", "정인", "비견"] }, els: { T: ["金"], F: ["木", "火"] } },
+  { pair: ["J", "P"], names: ["판단", "인식"], gods: { J: ["정관", "정재", "정인", "식신"], P: ["상관", "편재", "편인", "겁재", "편관"] }, els: { J: ["土", "金"], P: ["水", "火"] } },
+];
+const EL_WEIGHT = 3;
+const READING_GROUPS = [
+  ["총평", ["평생사주 총평"]],
+  ["인생 흐름", ["초년운", "중년운", "말년운"]],
+  ["성격", ["성격운", "타고난 성향", "타고난 인품"]],
+  ["사회", ["사회운", "사회적성격"]],
+  ["애정", ["이성운", "애정운"]],
+  ["재물", ["재물운", "재물모으는법", "재물손실 막는법", "재테크비법"]],
+  ["건강", ["건강운", "체질운"]],
+];
+const SAMPLE = { name: "홍길동", gender: "male", year: 1990, month: 1, day: 1, calendar: "solar", time: "", mbti: "ENFP-T" };
+const STORE_KEY = "saju-mbti-input";
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const ko = (s) => SHISHEN[s] || s || "";
+const hg = (s) => [...(s || "")].map((c) => HANGUL[c] || c).join("");
+const mbti = DATA.mbti;
+const TYPES = Object.fromEntries(mbti.types.map((t) => [t.type, t]));
+
+// ---------- 에어쇼 D-day ----------
+(function () {
+  const start = new Date(2026, 9, 22), end = new Date(2026, 9, 25);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const days = Math.round((start - today) / 86400000);
+  $("dday").textContent = days > 0 ? `D-${days}` : today <= end ? "개최 중" : "종료";
+})();
+
+// ---------- MBTI 선택 옵션 ----------
+$("f-mbti").innerHTML = `<option value="">모름 / 선택 안 함</option>` +
+  [...new Set(mbti.types.map((t) => t.group))].map((g) => `<optgroup label="${esc(g)}">` +
+    mbti.types.filter((t) => t.group === g).map((t) =>
+      ["A", "T"].map((id) => `<option value="${t.type}-${id}">${t.type}-${id} · ${esc(t.nickname)}</option>`).join("")).join("") +
+    `</optgroup>`).join("");
+
+// ---------- 사주 계산 (lunar-javascript) ----------
+function computeSaju(inp) {
+  if (typeof Solar === "undefined") throw new Error("만세력 라이브러리를 불러오지 못했습니다. 네트워크 연결을 확인한 뒤 새로고침하세요.");
+  const { year: y, month: m, day: d } = inp;
+  if (!(y >= 1900 && y <= 2050)) throw new Error("연도는 1900~2050 사이로 입력하세요.");
+  if (!(m >= 1 && m <= 12)) throw new Error("월은 1~12 사이로 입력하세요.");
+  if (!(d >= 1 && d <= 31)) throw new Error("일은 1~31 사이로 입력하세요.");
+
+  let sy = y, sm = m, sd = d, lunarText;
+  if (inp.calendar === "solar") {
+    const t = new Date(y, m - 1, d);
+    if (t.getMonth() !== m - 1) throw new Error(`${y}년 ${m}월에는 ${d}일이 없습니다.`);
+  } else {
+    const leap = inp.calendar === "lunar-leap";
+    let ls;
+    try { ls = Lunar.fromYmd(y, leap ? -m : m, d).getSolar(); }
+    catch (e) { throw new Error(leap ? `${y}년에는 음력 윤${m}월이 없거나 ${d}일이 없습니다.` : `음력 ${y}년 ${m}월에는 ${d}일이 없습니다.`); }
+    sy = ls.getYear(); sm = ls.getMonth(); sd = ls.getDay();
+  }
+
+  // 한국 표준시(동경 135°)와 실제 태양시(약 127.5°) 차이 30분 보정 → 子시 = 23:30~01:29
+  const hasTime = /^\d{2}:\d{2}$/.test(inp.time || "");
+  let dt;
+  if (hasTime) {
+    const [hh, mi] = inp.time.split(":").map(Number);
+    dt = new Date(sy, sm - 1, sd, hh, mi - 30);
+  } else {
+    dt = new Date(sy, sm - 1, sd, 12, 0);
+  }
+  const solar = Solar.fromYmdHms(dt.getFullYear(), dt.getMonth() + 1, dt.getDate(), dt.getHours(), dt.getMinutes(), 0);
+  const lunar = solar.getLunar();
+  const ec = lunar.getEightChar();
+  ec.setSect(1);
+  if (inp.calendar === "solar") {
+    const lm = lunar.getMonth();
+    lunarText = `음력 ${lunar.getYear()}. ${lm < 0 ? "윤" : ""}${Math.abs(lm)}. ${lunar.getDay()}.`;
+  } else {
+    lunarText = `양력 ${sy}. ${sm}. ${sd}.`;
+  }
+
+  const pillar = (gan, zhi, ganGod, zhiGods) => ({ gan, zhi, ganGod: ko(ganGod), zhiGod: ko(zhiGods && zhiGods[0]) });
+  const pillars = {
+    시: hasTime ? pillar(ec.getTimeGan(), ec.getTimeZhi(), ec.getTimeShiShenGan(), ec.getTimeShiShenZhi()) : null,
+    일: pillar(ec.getDayGan(), ec.getDayZhi(), "日主", ec.getDayShiShenZhi()),
+    월: pillar(ec.getMonthGan(), ec.getMonthZhi(), ec.getMonthShiShenGan(), ec.getMonthShiShenZhi()),
+    년: pillar(ec.getYearGan(), ec.getYearZhi(), ec.getYearShiShenGan(), ec.getYearShiShenZhi()),
+  };
+
+  const counts = Object.fromEntries(ELEMENTS.map((e) => [e, 0]));
+  let chars = 0;
+  for (const p of Object.values(pillars)) {
+    if (!p) continue;
+    counts[STEM_EL[p.gan]]++; counts[BRANCH_EL[p.zhi]]++; chars += 2;
+  }
+  const share = Object.fromEntries(ELEMENTS.map((e) => [e, counts[e] / chars]));
+
+  const gods = [];
+  for (const [k, p] of Object.entries(pillars)) {
+    if (!p) continue;
+    if (k !== "일") gods.push(p.ganGod);
+    gods.push(p.zhiGod);
+  }
+
+  const yun = ec.getYun(inp.gender === "male" ? 1 : 0);
+  const dayGan = ec.getDayGan();
+  const daeun = yun.getDaYun().filter((dy) => dy.getGanZhi()).map((dy) => {
+    const gz = dy.getGanZhi();
+    return { gz, age: dy.getStartAge(), year: dy.getStartYear(), endYear: dy.getEndYear(),
+      god: ko(LunarUtil.SHI_SHEN[dayGan + gz[0]]) };
+  });
+  const yunStart = `${yun.getStartYear()}년 ${yun.getStartMonth()}개월 ${yun.getStartDay()}일`;
+
+  return { inp, solar: { y: sy, m: sm, d: sd }, lunarText, hasTime, timeZhi: hasTime ? ec.getTimeZhi() : null,
+    pillars, counts, share, chars, gods, daeun, yunStart };
+}
+
+// ---------- 사주 → MBTI 추정 ----------
+function estimateMbti(s) {
+  const godCount = s.gods.reduce((m, g) => (g && (m[g] = (m[g] || 0) + 1), m), {});
+  const side = (axis, letter) => ({
+    pts: axis.gods[letter].reduce((t, g) => t + (godCount[g] || 0), 0) + axis.els[letter].reduce((t, e) => t + s.share[e] * EL_WEIGHT, 0),
+    why: [
+      ...axis.gods[letter].filter((g) => godCount[g]).map((g) => `${g}×${godCount[g]}`),
+      ...axis.els[letter].filter((e) => s.share[e] > 0).map((e) => `${e} ${(s.share[e] * 100).toFixed(0)}%`),
+    ],
+  });
+  const axes = AXES.map((axis) => {
+    const a = side(axis, axis.pair[0]), b = side(axis, axis.pair[1]);
+    return { axis, a, b, pick: a.pts >= b.pts ? axis.pair[0] : axis.pair[1] };
+  });
+  const dayEl = STEM_EL[s.pillars.일.gan];
+  const supportGods = ["비견", "겁재", "편인", "정인"].reduce((t, g) => t + (godCount[g] || 0), 0);
+  const supportPts = supportGods + (s.share[dayEl] + s.share[MOTHER[dayEl]]) * EL_WEIGHT;
+  const threshold = (s.gods.length + EL_WEIGHT) / 2;
+  return { axes, letters: axes.map((x) => x.pick), id: supportPts >= threshold ? "A" : "T", dayEl, supportGods, supportPts, threshold };
+}
+
+// ---------- 렌더링 ----------
+let current = null; // { s, est, mine }
+
+function renderSaju(s, isSample) {
+  const inp = s.inp;
+  const name = (inp.name || "").trim();
+  $("name").textContent = name ? `${name}님의 사주` : "나의 사주";
+  const cal = { solar: "양력", lunar: "음력", "lunar-leap": "음력 윤달" }[inp.calendar];
+  $("birth").textContent = `${cal} ${inp.year}. ${inp.month}. ${inp.day}.${s.hasTime ? " " + inp.time : " 시각 모름"} · ${inp.gender === "male" ? "남" : "여"} · ${s.lunarText}`;
+  const chars = [...(name || "四柱")].slice(0, 4).map(esc);
+  $("seal").innerHTML = chars.length > 2 ? `${chars.slice(0, 2).join("")}<br>${chars.slice(2).join("")}` : chars.join("");
+  $("sample-chip").hidden = !isSample;
+
+  $("pillars").innerHTML = ["시", "일", "월", "년"].map((k) => {
+    const p = s.pillars[k];
+    if (!p) return `<div class="pillar empty"><div class="lbl">${k}주</div><div class="god">시각 모름</div></div>`;
+    const se = STEM_EL[p.gan], be = BRANCH_EL[p.zhi], me = k === "일";
+    return `<div class="pillar${me ? " me" : ""}">
+      <div class="lbl">${k}주</div>
+      <div class="me-tag">${me ? "일간 · 나" : ""}</div>
+      <div class="god">${esc(p.ganGod)}</div>
+      <div class="hanja e-${se}" title="${hg(p.gan)}">${p.gan}</div>
+      <div class="el e-${se}">${hg(p.gan)} · ${EL_NAME[se]}</div>
+      <div class="hanja e-${be}" title="${hg(p.zhi)}">${p.zhi}</div>
+      <div class="el e-${be}">${hg(p.zhi)} · ${EL_NAME[be]}</div>
+      <div class="god">${esc(p.zhiGod)}</div>
+    </div>`;
+  }).join("");
+
+  $("elements").innerHTML = ELEMENTS.map((e) => `
+    <div class="erow"><span class="k e-${e}">${e}</span>
+      <span class="track"><span class="fill b-${e}" style="width:${(s.share[e] * 100).toFixed(1)}%"></span></span>
+      <span class="v">${s.counts[e]}자 ${(s.share[e] * 100).toFixed(0)}%</span></div>`).join("");
+  $("elements-note").textContent = `천간·지지 ${s.chars}글자의 오행을 셌습니다.${s.hasTime ? "" : " 시각을 모르면 6글자 기준입니다."}`;
+
+  const thisYear = new Date().getFullYear();
+  $("daeun").innerHTML = s.daeun.map((d) => {
+    const now = thisYear >= d.year && thisYear <= d.endYear;
+    return `<div class="dy${now ? " now" : ""}">
+      <div class="now-tag">${now ? "현재" : ""}</div>
+      <div class="age">${d.age}세</div>
+      <div class="hanja"><span class="e-${STEM_EL[d.gz[0]]}">${d.gz[0]}</span><span class="e-${BRANCH_EL[d.gz[1]]}">${d.gz[1]}</span></div>
+      <div class="god">${esc(d.god)}</div>
+      <div class="yr">${d.year}~</div>
+    </div>`;
+  }).join("");
+  $("daeun-note").textContent = `${inp.gender === "male" ? "남성" : "여성"} 기준, 출생 후 ${s.yunStart} 뒤 첫 대운이 시작됩니다. 오른쪽에서 왼쪽으로 10년씩 흐릅니다.`;
+
+  const dm = s.pillars.일.gan, dmEl = STEM_EL[dm];
+  const many = ELEMENTS.filter((e) => s.counts[e] >= 3);
+  const few = ELEMENTS.filter((e) => s.counts[e] === 0);
+  $("traits").innerHTML =
+    `<article><h3>일간 ${dm}(${hg(dm)}${EL_NAME[dmEl]})</h3><p>${DAY_MASTER[dm]}</p></article>` +
+    many.map((e) => `<article><h3 class="e-${e}">${e}(${EL_NAME[e]}) 기운이 많아요 · ${s.counts[e]}자</h3><p>${EL_ADVICE[e].many}</p></article>`).join("") +
+    few.map((e) => `<article><h3 class="e-${e}">${e}(${EL_NAME[e]}) 기운이 없어요</h3><p>${EL_ADVICE[e].few}</p></article>`).join("") +
+    (!many.length && !few.length ? `<article><h3>오행이 고르게 분포해 있어요</h3><p>한쪽으로 치우치지 않아 상황에 맞춰 균형을 잡는 힘이 있습니다.</p></article>` : "");
+}
+
+function renderPicker() {
+  const mine = current.mine;
+  const segs = AXES.map((axis, i) => axis.pair.map((l, j) =>
+    `<button type="button" id="pick-${l}" data-i="${i}" data-l="${l}" aria-pressed="${mine?.letters[i] === l}" title="${axis.names[j]}">${l}</button>`).join(""));
+  segs.push(["A", "T"].map((l) => `<button type="button" id="pick-id-${l}" data-i="id" data-l="${l}" aria-pressed="${mine?.id === l}" title="${mbti.identity[l]}">-${l}</button>`).join(""));
+  $("picker").innerHTML = segs.map((s) => `<div class="seg">${s}</div>`).join("");
+}
+
+function typeCard(src, letters, id, other) {
+  if (!letters) return `<div class="src">${src}</div><div class="code">????<span class="ch">-?</span></div>
+    <p class="sum">위 버튼으로 내 MBTI 다섯 글자를 고르면 사주 추정과 비교합니다.</p>`;
+  const code = letters.join(""), t = TYPES[code] || {};
+  const chars = letters.map((l, i) => `<span class="ch${other && other[i] !== l ? " diff" : ""}">${l}</span>`).join("");
+  return `<div class="src">${src}</div>
+    <div class="code">${chars}<span class="ch">-${id}</span></div>
+    <div class="nick">${esc(t.nickname)}</div>
+    <div class="grp">${esc(t.group)} · ${esc(mbti.identity[id])}</div>
+    <p class="sum">${esc(t.summary)}</p>
+    ${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">16Personalities에서 ${code} 자세히 보기 ↗</a>` : ""}`;
+}
+
+function renderMbti() {
+  const { est, mine } = current;
+  renderPicker();
+  const complete = mine && mine.letters.every(Boolean) && mine.id;
+  $("card-me").innerHTML = typeCard("내 MBTI", complete ? mine.letters : null, mine?.id, est.letters);
+  $("card-saju").innerHTML = typeCard("사주로 본 MBTI", est.letters, est.id, complete ? mine.letters : null);
+  $("score").textContent = complete ? `${mine.letters.filter((l, i) => l === est.letters[i]).length + (mine.id === est.id ? 1 : 0)}/5` : "–";
+  const verdict = (ok) => complete ? `<span class="verdict ${ok ? "ok" : "no"}">${ok ? "일치" : "다름"}</span>` : `<span class="verdict na">비교 대기</span>`;
+  $("axes").innerHTML = est.axes.map((e, i) => {
+    const [a, b] = e.axis.pair, tot = e.a.pts + e.b.pts || 1;
+    return `<div class="axis">
+      <div class="head"><span><b>${a}</b> ${e.axis.names[0]} ${e.a.pts.toFixed(1)}</span>${verdict(mine?.letters[i] === e.pick)}
+        <span>${e.b.pts.toFixed(1)} ${e.axis.names[1]} <b>${b}</b></span></div>
+      <div class="bar" role="img" aria-label="${a} ${e.a.pts.toFixed(1)}점, ${b} ${e.b.pts.toFixed(1)}점">
+        <span class="l" style="width:${(e.a.pts / tot * 100).toFixed(1)}%"></span></div>
+      <div class="why">${a}: ${esc(e.a.why.join(", ") || "근거 없음")} &nbsp;|&nbsp; ${b}: ${esc(e.b.why.join(", ") || "근거 없음")}</div>
+    </div>`;
+  }).join("") + `<div class="axis"><div class="head"><span><b>-${est.id}</b> ${esc(mbti.identity[est.id])}</span>${verdict(mine?.id === est.id)}
+      <span>신강 지수 ${est.supportPts.toFixed(1)} / 기준 ${est.threshold.toFixed(1)}</span></div>
+      <div class="why">비겁·인성 ${est.supportGods}자리, 일간 오행(${est.dayEl})과 이를 생해주는 오행(${MOTHER[est.dayEl]})의 비중 반영</div></div>`;
+}
+
+$("picker").addEventListener("click", (ev) => {
+  const btn = ev.target.closest("button"); if (!btn || !current) return;
+  const mine = current.mine || (current.mine = { letters: [null, null, null, null], id: null });
+  if (btn.dataset.i === "id") mine.id = btn.dataset.l; else mine.letters[+btn.dataset.i] = btn.dataset.l;
+  const complete = mine.letters.every(Boolean) && mine.id;
+  if (complete) {
+    $("f-mbti").value = `${mine.letters.join("")}-${mine.id}`;
+    saveInput(readForm());
+  }
+  renderMbti();
+});
+
+// ---------- 운세의신 원문 매칭 ----------
+const UNSIN_CAL = { solar: "양력", lunar: "음력", "lunar-leap": "윤달" };
+function findUnsin(s) {
+  const inp = s.inp;
+  const birth = `${inp.year}-${String(inp.month).padStart(2, "0")}-${String(inp.day).padStart(2, "0")}`;
+  const hour = s.hasTime ? s.timeZhi : "모름";
+  const sex = inp.gender === "male" ? "남" : "여";
+  return DATA.unsin.find((u) => u.input && u.input.birth === birth && u.input.calendar === UNSIN_CAL[inp.calendar]
+    && u.input.hour === hour && u.input.sex === sex);
+}
+let tab = 0;
+function renderReading(s) {
+  if (DATA.public) { $("reading-section").hidden = true; return; }
+  const u = findUnsin(s);
+  if (!u) {
+    const inp = s.inp;
+    const args = [`--sex ${inp.gender === "male" ? "남" : "여"}`, `--birth ${inp.year}-${String(inp.month).padStart(2, "0")}-${String(inp.day).padStart(2, "0")}`,
+      `--hour ${s.hasTime ? s.timeZhi : "모름"}`, `--cal ${UNSIN_CAL[inp.calendar]}`];
+    if ((inp.name || "").trim()) args.unshift(`--name ${inp.name.trim()}`);
+    $("reading-wrap").innerHTML = `<div style="display:grid;gap:10px">
+      <p>이 생년월일의 운세의신 평생사주 원문은 아직 수집되지 않았습니다. 아래 명령으로 수집한 뒤 페이지를 다시 만들면 17개 항목 풀이가 여기에 표시됩니다.</p>
+      <div class="cmd">py crawl.py unsin ${esc(args.join(" "))}\npy build_page.py</div>
+      <p class="note">수집된 원문 ${DATA.unsin.length}건: ${DATA.unsin.map((x) => esc(`${x.input.birth} ${x.input.calendar} ${x.input.hour} ${x.input.sex}`)).join(", ") || "없음"}</p></div>`;
+    return;
+  }
+  const readings = u["풀이"];
+  const groups = READING_GROUPS.map(([g, keys]) => [g, keys.filter((k) => readings[k])]).filter(([, k]) => k.length);
+  tab = Math.min(tab, groups.length - 1);
+  const draw = () => {
+    $("reading-wrap").innerHTML = `<div style="display:grid;gap:16px">
+      <div class="tabs" role="tablist">${groups.map(([g], i) => `<button type="button" role="tab" id="tab-${i}" aria-selected="${i === tab}">${g}</button>`).join("")}</div>
+      <div class="reading" role="tabpanel">${groups[tab][1].map((k) => `<article><h3>${esc(k)}</h3><p>${esc(readings[k])}</p></article>`).join("")}</div>
+      <p class="note">운세의신(unsin.co.kr) 평생사주 결과 원문입니다. 사이트의 명식 계산 기준이 위 사주명식과 다를 수 있습니다.</p></div>`;
+  };
+  $("reading-wrap").onclick = (ev) => { const b = ev.target.closest('button[role="tab"]'); if (!b) return; tab = +b.id.split("-")[1]; draw(); };
+  draw();
+}
+
+// ---------- 폼 ----------
+function readForm() {
+  return {
+    name: $("f-name").value.trim(),
+    gender: $("f-female").checked ? "female" : "male",
+    year: parseInt($("f-year").value, 10),
+    month: parseInt($("f-month").value, 10),
+    day: parseInt($("f-day").value, 10),
+    calendar: $("f-calendar").value,
+    time: $("f-time").value,
+    mbti: $("f-mbti").value,
+  };
+}
+function fillForm(inp) {
+  $("f-name").value = inp.name || "";
+  (inp.gender === "female" ? $("f-female") : $("f-male")).checked = true;
+  $("f-year").value = inp.year; $("f-month").value = inp.month; $("f-day").value = inp.day;
+  $("f-calendar").value = inp.calendar; $("f-time").value = inp.time || ""; $("f-mbti").value = inp.mbti || "";
+}
+function saveInput(inp) { try { localStorage.setItem(STORE_KEY, JSON.stringify(inp)); } catch (e) {} }
+function loadInput() { try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { return null; } }
+
+function run(inp, isSample) {
+  const s = computeSaju(inp);
+  const est = estimateMbti(s);
+  const m = /^([EI])([NS])([TF])([JP])-([AT])$/.exec(inp.mbti || "");
+  current = { s, est, mine: m ? { letters: [m[1], m[2], m[3], m[4]], id: m[5] } : null };
+  $("results").hidden = false;
+  renderSaju(s, isSample);
+  renderMbti();
+  renderReading(s);
+}
+
+$("f-time-clear").addEventListener("click", () => { $("f-time").value = ""; });
+$("form").addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  const inp = readForm();
+  try {
+    run(inp, false);
+    $("form-error").hidden = true;
+    saveInput(inp);
+    $("results").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  } catch (e) {
+    $("form-error").textContent = e.message;
+    $("form-error").hidden = false;
+  }
+});
+
+// ---------- 출처 ----------
+$("sources").innerHTML = `<div>만세력 계산: <a href="https://github.com/6tail/lunar-javascript" target="_blank" rel="noopener">lunar-javascript 1.6.13</a> (절기 기준 년·월주, 子시 23:30 기준, 30분 경도 보정)</div>
+  ${DATA.public ? "" : `<div>사주 원문: <a href="https://www.unsin.co.kr/unse/saju/total/form" target="_blank" rel="noopener">운세의신 평생사주</a> (Firecrawl 수집, ${esc(DATA.crawled_at)})</div>`}
+  <div>MBTI: <a href="${esc(mbti.source)}" target="_blank" rel="noopener">16Personalities 성격 유형</a></div>
+  <div>사천에어쇼: <a href="https://www.ytn.co.kr/_ln/0101_202609071401137873" target="_blank" rel="noopener">YTN 2026.09.07 보도</a>, <a href="https://www.fnnews.com/news/202609071028509107" target="_blank" rel="noopener">파이낸셜뉴스</a></div>`;
+
+// ---------- 시작: 저장된 입력 또는 예시 ----------
+(function start() {
+  const saved = loadInput();
+  const inp = saved && saved.year ? saved : SAMPLE;
+  fillForm(inp);
+  try { run(inp, !saved); }
+  catch (e) { $("form-error").textContent = e.message; $("form-error").hidden = false; $("results").hidden = true; }
+})();
+</script>
+
+</html>
